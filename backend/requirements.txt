@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+yfinance
+pandas
+numpy
+ta
+supabase
+httpx
+python-dotenv
+pydantic
+pydantic-settings
+python-multipart
+pytest
+feedparser
+
