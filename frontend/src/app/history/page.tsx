@@ -15,25 +15,125 @@ import {
   Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 
-/* ─── Analyst Reports sub-view ─── */
-function AnalystReportsView({ reports }: { reports: { fundamentals: string; technical: string; sentiment: string } }) {
-  const sections = [
-    { key: "fundamentals", title: "Fundamentals Analyst", emoji: "📊", color: "cyan" },
-    { key: "technical", title: "Technical Analyst", emoji: "📈", color: "violet" },
-    { key: "sentiment", title: "Sentiment Analyst", emoji: "💬", color: "amber" },
-  ] as const;
+// Markdown parser helper for formatting reports without heavy packages
+function MarkdownRenderer({ content }: { content: string }) {
+  if (!content) return null;
+  const lines = content.split("\n");
   return (
-    <div className="space-y-4">
-      {sections.map((s) => (
-        <div key={s.key} className="bg-[#0b121f] border border-white/5 rounded-2xl p-6 shadow-2xl">
-          <h3 className="font-bold text-white text-sm mb-3 flex items-center gap-2">
-            <span>{s.emoji}</span> {s.title}
-          </h3>
-          <p className="text-slate-300 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">
-            {reports[s.key]}
-          </p>
+    <div className="space-y-3 text-slate-300 text-sm leading-relaxed">
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith("###")) {
+          return (
+            <h4 key={idx} className="text-base font-bold text-white mt-4 mb-2 border-b border-white/5 pb-1 flex items-center gap-2">
+              <span className="w-1.5 h-3 bg-cyan-500 rounded-sm"></span>
+              {trimmed.replace(/^###\s*/, "")}
+            </h4>
+          );
+        }
+        if (trimmed.startsWith("##")) {
+          return (
+            <h3 key={idx} className="text-lg font-bold text-cyan-400 mt-5 mb-2">
+              {trimmed.replace(/^##\s*/, "")}
+            </h3>
+          );
+        }
+        if (trimmed.startsWith("#")) {
+          return (
+            <h2 key={idx} className="text-xl font-bold text-white mt-6 mb-3">
+              {trimmed.replace(/^#\s*/, "")}
+            </h2>
+          );
+        }
+        if (trimmed.startsWith("-") || trimmed.startsWith("*")) {
+          const content = trimmed.replace(/^[-*]\s*/, "");
+          return (
+            <div key={idx} className="flex gap-2 pl-2">
+              <span className="text-cyan-500/80">•</span>
+              <span>{content}</span>
+            </div>
+          );
+        }
+        return <p key={idx}>{trimmed}</p>;
+      })}
+    </div>
+  );
+}
+
+/* ─── Analyst Reports sub-view ─── */
+function AnalystReportsView({ reports }: { reports: { fundamentals: string; technical: string; sentiment: string; graham?: string } }) {
+  const [selectedAgent, setSelectedAgent] = useState<"fundamentals" | "technical" | "sentiment" | "graham">("fundamentals");
+
+  const agents = [
+    { id: "fundamentals", label: "Fundamentals Analyst", icon: "📊" },
+    { id: "technical", label: "Technical Analyst", icon: "📈" },
+    { id: "sentiment", label: "Sentiment Analyst", icon: "📰" },
+    { id: "graham", label: "Mr. Graham", icon: "📖" },
+  ];
+
+  const isGraham = selectedAgent === "graham";
+  const reportContent = reports[selectedAgent] || (isGraham ? "No Graham screen data saved for this report." : "");
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-center mb-6">
+        <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 shadow-inner gap-1">
+          {agents.map((agent) => (
+            <button
+              key={agent.id}
+              onClick={() => setSelectedAgent(agent.id as any)}
+              className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition duration-250 ${
+                selectedAgent === agent.id
+                  ? agent.id === "graham"
+                    ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+                    : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <span>{agent.icon}</span>
+              <span className="hidden sm:inline">{agent.label}</span>
+              <span className="sm:hidden">{agent.label.split(" ")[0]}</span>
+            </button>
+          ))}
         </div>
-      ))}
+      </div>
+
+      <div className={`border rounded-2xl p-6 shadow-2xl relative overflow-hidden animate-fade-in ${
+        isGraham
+          ? "bg-[#0d0f08] border-amber-500/10 shadow-[0_0_40px_rgba(245,158,11,0.04)]"
+          : "bg-[#0b121f] border-white/5"
+      }`}>
+        {/* Glow corner indicator */}
+        <div className={`absolute top-0 right-0 w-24 h-24 blur-2xl rounded-full ${
+          isGraham ? "bg-amber-500/6" : "bg-cyan-500/5"
+        }`} />
+
+        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-white/5">
+          <span className="text-2xl">
+            {selectedAgent === "fundamentals" ? "📊" : selectedAgent === "technical" ? "📈" : selectedAgent === "sentiment" ? "📰" : "📖"}
+          </span>
+          <div>
+            {isGraham ? (
+              <>
+                <h3 className="font-bold text-amber-400">Mr. Graham — Value Investing Screen</h3>
+                <p className="text-[10px] text-slate-400">Benjamin Graham framework · The Intelligent Investor · Security Analysis</p>
+              </>
+            ) : (
+              <>
+                <h3 className="font-bold text-white capitalize">{selectedAgent} Research Report</h3>
+                <p className="text-[10px] text-slate-400">Independent LLM agent assessment for this ticker</p>
+              </>
+            )}
+          </div>
+          {isGraham && (
+            <span className="ml-auto text-[10px] px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 font-semibold uppercase tracking-wider">
+              Graham Screen
+            </span>
+          )}
+        </div>
+
+        <MarkdownRenderer content={reportContent} />
+      </div>
     </div>
   );
 }

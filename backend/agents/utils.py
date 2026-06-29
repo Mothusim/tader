@@ -3,7 +3,7 @@ import httpx
 import json
 from typing import Dict, Any, List
 
-async def query_llm(messages: List[Dict[str, str]], json_mode: bool = False) -> str:
+async def query_llm(messages: List[Dict[str, str]], json_mode: bool = False, max_tokens_override: int = None) -> str:
     api_key = os.getenv("OPENROUTER_API_KEY")
     # Use a valid OpenRouter model; default to GPT-4o which supports the requested token limits.
     model = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o")
@@ -26,8 +26,10 @@ async def query_llm(messages: List[Dict[str, str]], json_mode: bool = False) -> 
         "X-Title": "Tader AI Advisor"
     }
     
-    # Limit token usage to stay within credit limits; default to 1500 tokens.
-    max_tokens = int(os.getenv("OPENROUTER_MAX_TOKENS", "1500"))
+    # Allow per-call override; fall back to env var; global default is 4000 tokens
+    # to ensure verbose Markdown reports (Graham, debates, etc.) are never truncated.
+    global_default = int(os.getenv("OPENROUTER_MAX_TOKENS", "4000"))
+    max_tokens = max_tokens_override if max_tokens_override is not None else global_default
     payload = {
         "model": model,
         "messages": messages,

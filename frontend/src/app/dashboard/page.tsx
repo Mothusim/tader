@@ -96,6 +96,7 @@ function ResearchLoadingProgress() {
     "Scraping latest RSS feed news and public Reddit posts...",
     "Fundamentals Analyst assessing P/E, debt, and balance sheet health...",
     "Technical Analyst evaluating RSI, MACD, and SMA trend signals...",
+    "Mr. Graham running Benjamin Graham value investing screen...",
     "Initializing Researcher Team: Bullish vs Bearish debate commencing...",
     "Trader Agent synthesising analyst reports and finalising recommendation...",
   ];
@@ -202,23 +203,30 @@ function DebateLogView({ log }: { log: DebateTurn[] }) {
 
 // Independent Analyst Reports View with sub-tabs
 function AnalystReportsView({ reports }: { reports: AgentReports }) {
-  const [selectedAgent, setSelectedAgent] = useState<"fundamentals" | "technical" | "sentiment">("fundamentals");
+  const [selectedAgent, setSelectedAgent] = useState<"fundamentals" | "technical" | "sentiment" | "graham">("fundamentals");
+
+  const agents = [
+    { id: "fundamentals", label: "Fundamentals Analyst", icon: "📊" },
+    { id: "technical", label: "Technical Analyst", icon: "📈" },
+    { id: "sentiment", label: "Sentiment Analyst", icon: "📰" },
+    { id: "graham", label: "Mr. Graham", icon: "📖" },
+  ];
+
+  const isGraham = selectedAgent === "graham";
 
   return (
     <div className="space-y-6">
       <div className="flex justify-center mb-6">
-        <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 shadow-inner">
-          {[
-            { id: "fundamentals", label: "Fundamentals Analyst", icon: "📊" },
-            { id: "technical", label: "Technical Analyst", icon: "📈" },
-            { id: "sentiment", label: "Sentiment Analyst", icon: "📰" },
-          ].map((agent) => (
+        <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 shadow-inner gap-1">
+          {agents.map((agent) => (
             <button
               key={agent.id}
-              onClick={() => setSelectedAgent(agent.id as any)}
+              onClick={() => setSelectedAgent(agent.id as "fundamentals" | "technical" | "sentiment" | "graham")}
               className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition duration-250 ${
-                selectedAgent === agent.id 
-                  ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" 
+                selectedAgent === agent.id
+                  ? agent.id === "graham"
+                    ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+                    : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
                   : "text-slate-400 hover:text-white"
               }`}
             >
@@ -230,18 +238,38 @@ function AnalystReportsView({ reports }: { reports: AgentReports }) {
         </div>
       </div>
 
-      <div className="bg-[#0b121f] border border-white/8 rounded-2xl p-6 shadow-2xl relative overflow-hidden animate-fade-in">
+      <div className={`border rounded-2xl p-6 shadow-2xl relative overflow-hidden animate-fade-in ${
+        isGraham
+          ? "bg-[#0d0f08] border-amber-500/10 shadow-[0_0_40px_rgba(245,158,11,0.04)]"
+          : "bg-[#0b121f] border-white/8"
+      }`}>
         {/* Glow corner indicator */}
-        <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 blur-2xl rounded-full" />
-        
+        <div className={`absolute top-0 right-0 w-24 h-24 blur-2xl rounded-full ${
+          isGraham ? "bg-amber-500/6" : "bg-cyan-500/5"
+        }`} />
+
         <div className="flex items-center gap-3 mb-4 pb-4 border-b border-white/5">
           <span className="text-2xl">
-            {selectedAgent === "fundamentals" ? "📊" : selectedAgent === "technical" ? "📈" : "📰"}
+            {selectedAgent === "fundamentals" ? "📊" : selectedAgent === "technical" ? "📈" : selectedAgent === "sentiment" ? "📰" : "📖"}
           </span>
           <div>
-            <h3 className="font-bold text-white capitalize">{selectedAgent} Research Report</h3>
-            <p className="text-[10px] text-slate-400">Independent LLM agent assessment for this ticker</p>
+            {isGraham ? (
+              <>
+                <h3 className="font-bold text-amber-400">Mr. Graham — Value Investing Screen</h3>
+                <p className="text-[10px] text-slate-400">Benjamin Graham framework · The Intelligent Investor · Security Analysis</p>
+              </>
+            ) : (
+              <>
+                <h3 className="font-bold text-white capitalize">{selectedAgent} Research Report</h3>
+                <p className="text-[10px] text-slate-400">Independent LLM agent assessment for this ticker</p>
+              </>
+            )}
           </div>
+          {isGraham && (
+            <span className="ml-auto text-[10px] px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 font-semibold uppercase tracking-wider">
+              Graham Screen
+            </span>
+          )}
         </div>
 
         <MarkdownRenderer content={reports[selectedAgent]} />

@@ -146,6 +146,7 @@ async def analyze_ticker(
             "news": news,
             "social": social,
             "recommendation": ai_recommendation,
+            "agent_reports": ai_recommendation.get("agent_reports", {}),
             "generated_at": datetime.utcnow().isoformat() + "Z"
         }
         

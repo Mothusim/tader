@@ -68,6 +68,7 @@ export interface AgentReports {
   fundamentals: string;
   technical: string;
   sentiment: string;
+  graham: string;
 }
 
 export interface DebateTurn {

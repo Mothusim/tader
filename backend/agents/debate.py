@@ -5,7 +5,8 @@ async def run_debate(
     ticker: str,
     fundamentals_report: str,
     technical_report: str,
-    sentiment_report: str
+    sentiment_report: str,
+    graham_report: str = ""
 ) -> List[Dict[str, str]]:
     """
     Orchestrates a 4-turn structured debate between a Bullish Researcher and a Bearish Researcher.
@@ -30,8 +31,12 @@ Here are the reports compiled by our analyst team for ticker '{ticker}':
 ### Sentiment Analyst Report:
 {sentiment_report}
 
-Please review this information and write your initial BUY thesis (Round 1 of the debate).
+### Mr. Graham — Value Investing Screen:
+{graham_report if graham_report else 'Not available.'}
+
+Please review all information above and write your initial BUY thesis (Round 1 of the debate).
 Focus on the most promising indicators, financial strengths, positive news, and potential catalysts that warrant a buy recommendation.
+You may agree with, disagree with, or build upon Mr. Graham's value assessment.
 Do not include any greeting or conversational filler. Start directly with your thesis.
 """
     messages_bull = [
@@ -59,6 +64,9 @@ Here are the analyst reports for ticker '{ticker}':
 ### Sentiment Analyst Report:
 {sentiment_report}
 
+### Mr. Graham — Value Investing Screen:
+{graham_report if graham_report else 'Not available.'}
+
 Here is the initial BUY thesis presented by the Bullish Researcher:
 ---
 {bullish_1}
@@ -66,6 +74,7 @@ Here is the initial BUY thesis presented by the Bullish Researcher:
 
 Please write your critique and counter-thesis (Round 2 of the debate).
 Highlight specific risks, warning signs, valuation traps, and rebut the Bullish Researcher's points directly.
+You may leverage Mr. Graham's value screen to support your risk arguments where relevant.
 Do not include any greeting or conversational filler. Start directly with your critique.
 """
     messages_bear = [
